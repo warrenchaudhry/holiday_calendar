@@ -1,0 +1,75 @@
+<div class="row">
+  <%= label_tag :country, 'Select Country' %>
+  <%= select_tag :country, options_for_select(available_regions), selected: params[:regions], id: 'region_select', class: 'selectpicker col-md-6', multiple: true, data: {'live-search' => true, 'max-options' => 4} %>
+</div>
+<hr>
+<div class="row">
+<div id="calendar" style="width:800px;"></div>
+</div>
+<% content_for :page_scripts do %>
+<script>
+var source = [];
+$(function(){
+  $('#region_select').val("<%= params[:regions] %>");
+  $('#region_select').change();
+  var regions = $('#region_select option:selected').val();
+
+  loadCalendar(regions);
+
+  $('#region_select').on('change', function(){
+    regions = $(this).val();
+    reloadCal(regions);
+  });
+
+});
+
+function reloadCal(regions) {
+    var events = {
+                url: "/events.json",
+                type: 'GET',
+                data: {
+                    regions: regions
+                }
+            }
+    $('#calendar').fullCalendar( 'removeEventSource', events);
+    $('#calendar').fullCalendar('addEventSource', events);
+    $('#calendar').fullCalendar('rerenderEvents');
+}
+
+function loadCalendar(regions){
+  $('#calendar').fullCalendar({
+    // header: {
+    //     center: 'month,agendaFourDay' // buttons for switching between views
+    // },
+    // views: {
+    //     agendaFourDay: {
+    //         type: 'agenda',
+    //         duration: { days: 7 },
+    //         buttonText: '7 days'
+    //     }
+    // },
+    dayClick: function() {
+         alert('a day has been clicked!');
+    },
+    eventClick:  function(event, jsEvent, view) {
+        //set the values and open the modal
+        alert(event.description);
+    },
+    editable: true,
+    events: {
+      url: '/events.json',
+      type: 'GET',
+      data: {
+        regions: regions
+      },
+      error: function() {
+          alert('there was an error while fetching events!');
+      },
+
+      // color: 'yellow',   // a non-ajax option
+      // textColor: 'black' // a non-ajax option
+    },
+  });
+}
+</script>
+<% end %>
